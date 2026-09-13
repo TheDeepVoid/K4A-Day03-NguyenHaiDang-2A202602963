@@ -45,6 +45,20 @@ class MockOfflineProvider(BaseLLMProvider):
                 "thought": "Đã nhận được kết quả Observation từ Tool, tổng hợp câu trả lời cuối cùng."
             }
 
+        # Nhận diện thao tác không có công cụ hỗ trợ để từ chối và chống ảo giác
+        if any(w in prompt_lower for w in ["chuyển tiền", "chuyển khoản", "cổ phiếu", "chứng khoán", "bắn tiền", "thời tiết"]):
+            return {
+                "type": "text",
+                "content": (
+                    "❌ [LỖI: CÔNG CỤ CHƯA ĐƯỢC THIẾT LẬP]: Hệ thống không tìm thấy công cụ nào được cài đặt để thực hiện thao tác này.\n"
+                    "Hiện tại tôi chỉ được trang bị các công cụ quản lý ngân sách cá nhân:\n"
+                    "- 'check_budget_limits_and_history': Tra cứu hạn mức và lịch sử chi tiêu.\n"
+                    "- 'update_finance_database': Ghi nhận chi tiêu vào Notion/Sheets/Airtable.\n"
+                    "Vui lòng thử lại với các yêu cầu kiểm tra hoặc ghi chép chi tiêu trong phạm vi hỗ trợ."
+                ),
+                "thought": "Yêu cầu đòi hỏi công cụ không được thiết lập trên hệ thống. Áp dụng quy tắc Anti-Hallucination: Từ chối thực hiện và thông báo lỗi rõ ràng."
+            }
+
         # Mô phỏng nhận diện intent gọi Tool cho cả Personal Finance và Học vụ
         if "kichi" in prompt_lower or "350k" in prompt_lower or "ghi nhận" in prompt_lower:
             return {

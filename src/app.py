@@ -68,6 +68,17 @@ def format_observation_summary(tool_name: str, obs_data: dict) -> str:
     if not obs_data:
         return "Chưa nhận được dữ liệu từ MCP Server."
 
+    if obs_data.get("status") == "UNKNOWN_TOOL":
+        supported = obs_data.get("supported_tools", ["check_budget_limits_and_history", "update_finance_database"])
+        return (
+            f"❌ [LỖI: CÔNG CỤ CHƯA ĐƯỢC THIẾT LẬP]: {obs_data.get('error', f'Công cụ {tool_name} không tồn tại.')}\n"
+            f"Hệ thống đã dừng hành động để tránh ảo giác dữ liệu (Anti-Hallucination).\n"
+            f"Các công cụ khả dụng hiện có trên MCP Server: {', '.join(supported)}."
+        )
+
+    if obs_data.get("status") == "EXECUTION_ERROR":
+        return f"❌ [LỖI THỰC THI]: {obs_data.get('error', 'Lỗi thực thi công cụ trên hệ thống.')}"
+
     if obs_data.get("status") == "NOT_FOUND":
         return obs_data.get("message", "Không tìm thấy dữ liệu yêu cầu.")
 
@@ -211,14 +222,23 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
 
             # Cập nhật context cho bước ReAct tiếp theo
             obs_formatted = json.dumps(obs_data, ensure_ascii=False)
-            current_prompt = (
-                f"Yêu cầu ban đầu của người dùng: {user_query}\n\n"
-                f"Các bước đã thực hiện:\n"
-                f"- Đã gọi công cụ: {tool_name} với tham số {json.dumps(arguments, ensure_ascii=False)}\n"
-                f"- Kết quả quan sát (Observation) từ MCP Server:\n{obs_formatted}\n\n"
-                f"Dựa vào thông tin trên, hãy thực hiện hành động tiếp theo (gọi thêm công cụ nếu cần cập nhật tiếp) "
-                f"hoặc đưa ra câu trả lời cuối cùng (Final Answer) đầy đủ, chính xác và có cảnh báo nếu sắp/đã vượt hạn mức."
-            )
+            if obs_data.get("status") in ["UNKNOWN_TOOL", "EXECUTION_ERROR"]:
+                current_prompt = (
+                    f"Yêu cầu ban đầu của người dùng: {user_query}\n\n"
+                    f"CẢNH BÁO QUAN TRỌNG TỪ MCP SERVER:\n"
+                    f"- Thao tác công cụ '{tool_name}' không thành công: {obs_formatted}\n"
+                    f"- YÊU CẦU BẮT BUỘC: Bạn không được gọi lại công cụ này và TUYỆT ĐỐI KHÔNG được tự bịa đặt kết quả thành công.\n"
+                    f"Hãy đưa ra thông báo lỗi chính xác, nêu rõ công cụ chưa được thiết lập trên hệ thống và hướng dẫn người dùng sử dụng các công cụ quản lý chi tiêu hiện có."
+                )
+            else:
+                current_prompt = (
+                    f"Yêu cầu ban đầu của người dùng: {user_query}\n\n"
+                    f"Các bước đã thực hiện:\n"
+                    f"- Đã gọi công cụ: {tool_name} với tham số {json.dumps(arguments, ensure_ascii=False)}\n"
+                    f"- Kết quả quan sát (Observation) từ MCP Server:\n{obs_formatted}\n\n"
+                    f"Dựa vào thông tin trên, hãy thực hiện hành động tiếp theo (gọi thêm công cụ nếu cần cập nhật tiếp) "
+                    f"hoặc đưa ra câu trả lời cuối cùng (Final Answer) đầy đủ, chính xác và có cảnh báo nếu sắp/đã vượt hạn mức."
+                )
 
     # Nếu thoát vòng lặp mà chưa có FINAL_ANSWER (đạt max iterations)
     if not trace_logs or trace_logs[-1]["action_type"] != "FINAL_ANSWER":

@@ -4,6 +4,7 @@ Mã nguồn chứa danh sách Tool Schemas (JSON Schema) và Execution Layer ph�
 Hỗ trợ chủ đề Trợ lý Quản lý Chi tiêu & Cảnh báo Ngân sách Cá nhân (Personal Finance Agent) và Học vụ VinUni.
 """
 
+import copy
 import json
 from typing import Dict, Any
 
@@ -98,6 +99,17 @@ TOOLS_SCHEMA = [
             },
             "required": ["category", "amount", "description"]
         }
+    },
+
+    # Tool 5: Nạp dữ liệu mẫu vào hệ thống (Load Sample Data)
+    {
+        "name": "load_sample_data",
+        "description": "Nạp bộ dữ liệu mẫu ban đầu về ngân sách và lịch sử chi tiêu (ăn uống 5tr, giải trí 2tr, mua sắm 3tr, v.v.) phục vụ trải nghiệm và kiểm thử.",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
     }
 ]
 
@@ -124,7 +136,8 @@ MOCK_DATABASE = {
     }
 }
 
-FINANCE_DATABASE = {
+# Dữ liệu mẫu (Sample Data) được lưu trữ để nạp khi người dùng yêu cầu
+SAMPLE_FINANCE_DATABASE = {
     "categories": {
         "ăn uống": {
             "monthly_limit": 5000000,
@@ -178,6 +191,64 @@ FINANCE_DATABASE = {
         }
     }
 }
+
+# Trạng thái mặc định ban đầu là 0 (Zero Default State)
+DEFAULT_ZERO_DATABASE = {
+    "categories": {
+        "ăn uống": {
+            "monthly_limit": 0,
+            "spent": 0,
+            "remaining": 0,
+            "currency": "VND",
+            "recent_transactions": []
+        },
+        "giải trí": {
+            "monthly_limit": 0,
+            "spent": 0,
+            "remaining": 0,
+            "currency": "VND",
+            "recent_transactions": []
+        },
+        "mua sắm": {
+            "monthly_limit": 0,
+            "spent": 0,
+            "remaining": 0,
+            "currency": "VND",
+            "recent_transactions": []
+        },
+        "di chuyển": {
+            "monthly_limit": 0,
+            "spent": 0,
+            "remaining": 0,
+            "currency": "VND",
+            "recent_transactions": []
+        },
+        "học tập": {
+            "monthly_limit": 0,
+            "spent": 0,
+            "remaining": 0,
+            "currency": "VND",
+            "recent_transactions": []
+        }
+    }
+}
+
+# Khởi tạo mặc định: Dữ liệu bắt đầu ở mức 0
+FINANCE_DATABASE = copy.deepcopy(DEFAULT_ZERO_DATABASE)
+
+
+def load_sample_finance_data() -> dict:
+    """Nạp dữ liệu mẫu ban đầu vào cơ sở dữ liệu"""
+    FINANCE_DATABASE["categories"].clear()
+    FINANCE_DATABASE["categories"].update(copy.deepcopy(SAMPLE_FINANCE_DATABASE["categories"]))
+    return FINANCE_DATABASE["categories"]
+
+
+def reset_to_zero_finance_data() -> dict:
+    """Khôi phục trạng thái mặc định: tất cả dữ liệu là 0"""
+    FINANCE_DATABASE["categories"].clear()
+    FINANCE_DATABASE["categories"].update(copy.deepcopy(DEFAULT_ZERO_DATABASE["categories"]))
+    return FINANCE_DATABASE["categories"]
 
 
 def _normalize_category(cat: str) -> str:
@@ -244,11 +315,14 @@ def execute_check_budget_limits_and_history(category: str, month: str = "2026-09
     if cat_key == "tất cả" or cat_key == "all":
         overview = {}
         for k, v in categories.items():
+            lim = v["monthly_limit"]
+            sp = v["spent"]
+            pct_str = f"{(sp / lim * 100):.1f}%" if lim > 0 else ("100.0%" if sp > 0 else "0.0%")
             overview[k] = {
-                "monthly_limit": v["monthly_limit"],
-                "spent": v["spent"],
+                "monthly_limit": lim,
+                "spent": sp,
                 "remaining": v["remaining"],
-                "usage_percentage": f"{(v['spent'] / v['monthly_limit'] * 100):.1f}%"
+                "usage_percentage": pct_str
             }
         return json.dumps({
             "status": "SUCCESS",
@@ -267,10 +341,15 @@ def execute_check_budget_limits_and_history(category: str, month: str = "2026-09
     limit = cat_data["monthly_limit"]
     spent = cat_data["spent"]
     remaining = cat_data["remaining"]
-    usage_pct = (spent / limit) * 100
+    usage_pct = (spent / limit) * 100 if limit > 0 else (100.0 if spent > 0 else 0.0)
 
     alert = ""
-    if remaining < 0:
+    if limit == 0:
+        if spent == 0:
+            alert = "ℹ️ Danh mục đang ở trạng thái mặc định (0 VNĐ). Chưa phát sinh chi tiêu và chưa thiết lập hạn mức."
+        else:
+            alert = f"⚠️ CẢNH BÁO: Danh mục chưa thiết lập hạn mức định mức và đã chi tiêu {spent:,.0f} VNĐ!"
+    elif remaining < 0:
         alert = f"⚠️ CẢNH BÁO NGUY HIỂM: Đã bội chi {-remaining:,.0f} VNĐ!"
     elif usage_pct >= 80:
         alert = f"⚠️ CẢNH BÁO: Đã dùng {usage_pct:.1f}% ngân sách! Chỉ còn {remaining:,.0f} VNĐ."
@@ -297,11 +376,10 @@ def execute_update_finance_database(category: str, amount: float, description: s
     categories = FINANCE_DATABASE["categories"]
 
     if cat_key not in categories:
-        # Tự động tạo danh mục mới với hạn mức mặc định 3,000,000 VND
         categories[cat_key] = {
-            "monthly_limit": 3000000,
+            "monthly_limit": 0,
             "spent": 0,
-            "remaining": 3000000,
+            "remaining": 0,
             "currency": "VND",
             "recent_transactions": []
         }
@@ -321,9 +399,12 @@ def execute_update_finance_database(category: str, amount: float, description: s
     limit = cat_data["monthly_limit"]
     spent = cat_data["spent"]
     remaining = cat_data["remaining"]
-    usage_pct = (spent / limit) * 100
+    usage_pct = (spent / limit) * 100 if limit > 0 else (100.0 if spent > 0 else 0.0)
 
-    if remaining < 0:
+    if limit == 0:
+        status = "ZERO_LIMIT_WARNING"
+        alert = f"⚠️ LƯU Ý: Đã ghi nhận {amount_num:,.0f} VNĐ vào danh mục '{cat_key}'. Danh mục này đang có hạn mức mặc định là 0 VNĐ."
+    elif remaining < 0:
         status = "OVER_BUDGET_WARNING"
         alert = f"🚨 CẢNH BÁO VƯỢT HẠN MỨC: Danh mục '{cat_key}' đã vượt ngân sách {-remaining:,.0f} VNĐ! Hãy tạm dừng chi tiêu danh mục này."
     elif usage_pct >= 85:
@@ -349,6 +430,16 @@ def execute_update_finance_database(category: str, amount: float, description: s
     }, ensure_ascii=False)
 
 
+def execute_load_sample_data() -> str:
+    """Thực thi nạp dữ liệu mẫu ban đầu"""
+    data = load_sample_finance_data()
+    return json.dumps({
+        "status": "SUCCESS",
+        "message": "Đã nạp thành công bộ dữ liệu tài chính mẫu (ăn uống 5tr, giải trí 2tr, mua sắm 3tr, v.v.) và lịch sử giao dịch ban đầu!",
+        "categories_count": len(data)
+    }, ensure_ascii=False)
+
+
 # Tool Dispatch Table
 TOOL_DISPATCH_MAP = {
     "academic_query": execute_academic_query,
@@ -358,7 +449,8 @@ TOOL_DISPATCH_MAP = {
     "check_budget": execute_check_budget_limits_and_history,
     "update_finance_database": execute_update_finance_database,
     "update_finance": execute_update_finance_database,
-    "record_expense": execute_update_finance_database
+    "record_expense": execute_update_finance_database,
+    "load_sample_data": execute_load_sample_data
 }
 
 
@@ -369,5 +461,16 @@ def dispatch_tool_call(tool_name: str, arguments: Dict[str, Any]) -> str:
         try:
             return handler(**arguments)
         except Exception as e:
-            return json.dumps({"status": "EXECUTION_ERROR", "error": str(e)}, ensure_ascii=False)
-    return json.dumps({"status": "UNKNOWN_TOOL", "error": f"Tool '{tool_name}' không tồn tại!"}, ensure_ascii=False)
+            return json.dumps({
+                "status": "EXECUTION_ERROR",
+                "error": f"Lỗi thực thi công cụ '{tool_name}': {str(e)}",
+                "message": f"❌ [LỖI THỰC THI]: Không thể thực thi công cụ '{tool_name}' do lỗi tham số hoặc hệ thống: {str(e)}"
+            }, ensure_ascii=False)
+    
+    supported_list = ["check_budget_limits_and_history", "update_finance_database", "load_sample_data"]
+    return json.dumps({
+        "status": "UNKNOWN_TOOL",
+        "error": f"Công cụ '{tool_name}' không tồn tại hoặc chưa được thiết lập trên MCP Server.",
+        "supported_tools": supported_list,
+        "message": f"❌ [LỖI MCP SERVER]: Không tìm thấy công cụ '{tool_name}' được thiết lập trên hệ thống. Các công cụ khả dụng: {', '.join(supported_list)}."
+    }, ensure_ascii=False)

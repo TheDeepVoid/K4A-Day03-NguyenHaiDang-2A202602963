@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TC01",
+    "type": "direct_query",
+    "question": "Chào bạn, quy tắc quản lý tài chính 50/30/20 hoạt động như thế nào và tôi nên phân bổ tiền chi tiêu hàng tháng ra sao?",
+    "expected_behavior": "Agent trả lời trực tiếp từ kiến thức nền tảng, không cần gọi bất kỳ Tool nào.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC02",
+    "type": "single_tool_query",
+    "question": "Hãy kiểm tra giúp tôi ngân sách và hạn mức chi tiêu ăn uống trong tháng này còn lại bao nhiêu.",
+    "expected_behavior": "Agent nhận diện nhu cầu tra cứu, tự động phát sinh Tool Call 'check_budget_limits_and_history' với danh mục 'ăn uống'.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC03",
+    "type": "expense_recording",
+    "question": "Ghi nhận giúp tôi một khoản chi mua sách giáo trình AI với số tiền 200,000 VNĐ vào danh mục học tập trên Notion.",
+    "expected_behavior": "Agent tự động phát sinh Tool Call 'update_finance_database' với danh mục 'học tập', số tiền 200000, nội dung chi và đích đến Notion.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC04",
+    "type": "multi_step_reasoning",
+    "question": "Tôi vừa ăn tối 350k ở Kichi Kichi, hãy kiểm tra ngân sách ăn uống còn lại và ghi nhận giao dịch này vào sổ thu chi giúp tôi nhé.",
+    "expected_behavior": "Agent phân tích khoản chi tiêu thực tế, gọi công cụ cập nhật cơ sở dữ liệu tài chính, trích xuất số dư còn lại và đưa ra cảnh báo hạn mức.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC05",
+    "type": "edge_case_handling",
+    "question": "Kiểm tra giúp tôi hạn mức ngân sách của danh mục 'crypto và tiền ảo' trong tháng này.",
+    "expected_behavior": "Agent gọi Tool tra cứu, nhận kết quả NOT_FOUND từ MCP Server và đưa ra phản hồi lịch sự, chính xác không bịa đặt dữ liệu (Anti-Hallucination).",
+    "complexity": "Medium"
+  }
+]

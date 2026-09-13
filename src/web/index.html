@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Finance ReAct Agent | ReAct Logs & Tool Chain</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0a0e17;
+      --bg-surface: rgba(18, 24, 38, 0.85);
+      --bg-card: rgba(28, 36, 56, 0.65);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.4);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+    }
+
+    /* Header */
+    header {
+      padding: 14px 28px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: blur(16px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6366f1, #10b981);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .brand-text h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.9); }
+    }
+
+    /* Action Buttons in Header */
+    .btn-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .btn-react-logs {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+
+    .btn-react-logs:hover, .btn-react-logs.active {
+      background: #6366f1;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-sample {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    .btn-sample:hover {
+      background: #10b981;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-react-logs .logs-badge {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .btn-reset:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* Main Container */
+    .app-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Left Sidebar: Dashboard */
+    .sidebar {
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      backdrop-filter: blur(16px);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+    }
+
+    .section-header {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .budget-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .budget-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .budget-card:hover {
+      border-color: var(--border-focus);
+      transform: translateY(-1px);
+    }
+
+    .budget-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .category-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: capitalize;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    .badge-safe {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-warn {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .budget-progress-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .budget-progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    .budget-numbers {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .budget-numbers b {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Quick Prompts */
+    .quick-prompts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chip-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      padding: 8px 12px;
+      font-size: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chip-btn:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Right: Chat Container */
+    .chat-section {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .message-row {
+      display: flex;
+      gap: 12px;
+      max-width: 860px;
+      width: 100%;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-row.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-row.agent {
+      align-self: flex-start;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .avatar.user-av {
+      background: #374151;
+    }
+
+    .avatar.agent-av {
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+
+    .message-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: calc(100% - 48px);
+    }
+
+    /* Response Card with Tab Switcher */
+    .response-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-tab-nav {
+      display: flex;
+      background: rgba(15, 23, 42, 0.85);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 6px 10px;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background: #6366f1;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
+    }
+
+    .tab-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .tab-pane {
+      display: none;
+      padding: 16px 20px;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Content Styling */
+    .answer-text {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-main);
+    }
+
+    .answer-text p {
+      margin-bottom: 10px;
+    }
+    .answer-text p:last-child {
+      margin-bottom: 0;
+    }
+    .answer-text ul {
+      margin-left: 20px;
+      margin-bottom: 10px;
+    }
+    .answer-text li {
+      margin-bottom: 4px;
+    }
+    .answer-text strong {
+      color: #fff;
+    }
+
+    /* User Bubble */
+    .user .bubble {
+      padding: 14px 18px;
+      background: #4f46e5;
+      color: #fff;
+      border-radius: var(--radius-md);
+      border-bottom-right-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    /* ReAct Logs Timeline & Tool Chain */
+    .react-logs-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    .chain-step-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border-left: 4px solid var(--primary);
+    }
+
+    .chain-step-card.tool-execution {
+      border-left-color: #f59e0b;
+    }
+
+    .chain-step-card.final-answer {
+      border-left-color: #10b981;
+    }
+
+    .step-header {
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-thought { color: #a5b4fc; }
+    .badge-tool { color: #fbbf24; }
+    .badge-final { color: #34d399; }
+
+    .step-latency {
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    .step-content {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .log-section-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .code-box {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: #cbd5e1;
+      font-size: 11.5px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-x: auto;
+    }
+
+    .tool-args-box {
+      border-left: 2px solid #f59e0b;
+    }
+
+    .obs-box {
+      border-left: 2px solid #10b981;
+    }
+
+    .btn-copy-raw {
+      margin-top: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: inherit;
+      width: fit-content;
+      transition: all 0.2s ease;
+    }
+
+    .btn-copy-raw:hover {
+      background: rgba(99, 102, 241, 0.2);
+      color: #fff;
+    }
+
+    /* Slide-over Global ReAct Logs Drawer */
+    .logs-drawer {
+      position: absolute;
+      top: 0;
+      right: -560px;
+      width: 540px;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      border-left: 1px solid rgba(99, 102, 241, 0.3);
+      backdrop-filter: blur(24px);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logs-drawer.open {
+      right: 0;
+    }
+
+    .drawer-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .drawer-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .drawer-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+    }
+
+    .drawer-close-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .drawer-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Input Footer */
+    .chat-footer {
+      padding: 18px 24px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      backdrop-filter: blur(16px);
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 12px;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .chat-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border: none;
+      border-radius: var(--radius-md);
+      color: #fff;
+      padding: 0 24px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-send:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .btn-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Loading dots */
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 12px 16px;
+    }
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: typing 1.4s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-brand">
+      <div class="brand-icon">💳</div>
+      <div class="brand-text">
+        <h1>Personal Finance ReAct Agent</h1>
+        <p>Kiến trúc ReAct Loop & Native Tool Calling qua Model Context Protocol (MCP)</p>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        <span>Model: Gemini 3.5 Flash Lite / MCP Active</span>
+      </div>
+      
+      <!-- Interactable ReAct Logs Tab right next to Reset Data -->
+      <button id="btnReactLogsToggle" class="btn-header btn-react-logs" onclick="toggleGlobalLogsDrawer()" title="Xem toàn bộ chuỗi ReAct Tool Chain Logs">
+        <span>🔄 ReAct Logs</span>
+        <span class="logs-badge" id="headerLogsCount">0</span>
+      </button>
+
+      <!-- Load Sample Data Button -->
+      <button id="btnLoadSample" class="btn-header btn-sample" onclick="loadSampleData()" title="Tải dữ liệu mẫu ban đầu (Sample Data)">
+        <span>📥 Load Sample Data</span>
+      </button>
+
+      <!-- Reset Data Button -->
+      <button class="btn-header btn-reset" onclick="resetDatabase()" title="Khôi phục trạng thái mặc định (0)">
+        <span>🔄 Reset Data (0)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div class="app-body">
+    <!-- Left Sidebar: Dashboard -->
+    <aside class="sidebar">
+      <div class="section-header">
+        <span>📊 Ngân Sách Tháng 09/2026</span>
+      </div>
+
+      <div class="budget-list" id="budgetList">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div class="section-header" style="margin-top: 10px;">
+        <span>💡 Gợi Ý Thao Tác Nhanh</span>
+      </div>
+
+      <div class="quick-prompts">
+        <button class="chip-btn" onclick="sendQuickPrompt('Chào bạn, quy tắc quản lý tài chính 50/30/20 hoạt động như thế nào?')">
+          <span>📘</span>
+          <span>Hỏi quy tắc 50/30/20 (TC01)</span>
+        </button>
+        <button class="chip-btn" onclick="sendQuickPrompt('Hãy kiểm tra giúp tôi ngân sách và hạn mức chi tiêu ăn uống trong tháng này còn lại bao nhiêu.')">
+          <span>🍜</span>
+          <span>Tra cứu ngân sách ăn uống (TC02)</span>
+        </button>
+        <button class="chip-btn" onclick="sendQuickPrompt('Ghi nhận giúp tôi một khoản chi mua sách giáo trình AI với số tiền 200,000 VNĐ vào danh mục học tập trên Notion.')">
+          <span>📚</span>
+          <span>Ghi chép mua sách học tập (TC03)</span>
+        </button>
+        <button class="chip-btn" onclick="sendQuickPrompt('Tôi vừa ăn tối 350k ở Kichi Kichi, hãy kiểm tra ngân sách ăn uống còn lại và ghi nhận giao dịch này vào sổ thu chi giúp tôi nhé.')">
+          <span>🚨</span>
+          <span>Ăn tối Kichi Kichi 350k & Cảnh báo (TC04)</span>
+        </button>
+        <button class="chip-btn" onclick="sendQuickPrompt('Kiểm tra giúp tôi hạn mức ngân sách của danh mục crypto và tiền ảo trong tháng này.')">
+          <span>🪙</span>
+          <span>Hỏi danh mục không tồn tại (TC05)</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Right: Chat Area -->
+    <main class="chat-section">
+      <div class="chat-messages" id="chatMessages">
+        <!-- Welcome Message -->
+        <div class="message-row agent">
+          <div class="avatar agent-av">🤖</div>
+          <div class="message-content">
+            <div class="response-card">
+              <div class="tab-pane active" style="display: block;">
+                <div class="answer-text">
+                  <p>👋 Xin chào <strong>Nguyễn Hải Đăng</strong>! Tôi là <strong>Personal Finance ReAct Agent</strong>.</p>
+                  <p>Sau mỗi câu lệnh, bạn có thể xem phản hồi trực tiếp hoặc bấm vào tab <strong>🔄 ReAct Logs</strong> ở góc trên bên phải (cạnh nút Reset Data) hoặc trên từng tin nhắn để kiểm tra toàn bộ chuỗi suy luận <em>(Thought)</em>, gọi công cụ <em>(Tool Call)</em> và quan sát từ MCP Server <em>(Observation)</em>.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide-over Drawer for Global ReAct Logs -->
+      <div id="globalLogsDrawer" class="logs-drawer">
+        <div class="drawer-header">
+          <div class="drawer-title">
+            <span>🔄 ReAct Tool Chain & Waterfall Logs</span>
+          </div>
+          <button class="drawer-close-btn" onclick="toggleGlobalLogsDrawer()">✕</button>
+        </div>
+        <div class="drawer-body" id="globalLogsContainer">
+          <div style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 20px;">
+            Đang tải dữ liệu ReAct Logs...
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Footer -->
+      <footer class="chat-footer">
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            id="userInput" 
+            class="chat-input" 
+            placeholder="Ví dụ: 'Vừa ăn tối 350k ở Kichi Kichi' hoặc 'Kiểm tra ngân sách ăn uống'..."
+            onkeydown="if(event.key === 'Enter') handleSendMessage()"
+          />
+          <button id="sendBtn" class="btn-send" onclick="handleSendMessage()">
+            <span>Gửi Tin</span>
+            <span>➤</span>
+          </button>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    let promptCounter = 0;
+    let allSessionTraces = [];
+    const budgetListEl = document.getElementById('budgetList');
+    const chatMessagesEl = document.getElementById('chatMessages');
+    const userInputEl = document.getElementById('userInput');
+    const sendBtnEl = document.getElementById('sendBtn');
+    const headerLogsCountEl = document.getElementById('headerLogsCount');
+    const globalLogsDrawer = document.getElementById('globalLogsDrawer');
+    const globalLogsContainer = document.getElementById('globalLogsContainer');
+    const btnReactLogsToggle = document.getElementById('btnReactLogsToggle');
+
+    // Load initial budget dashboard
+    async function fetchBudget() {
+      try {
+        const res = await fetch('/api/budget');
+        const data = await res.json();
+        renderBudget(data);
+      } catch (err) {
+        console.error("Lỗi tải ngân sách:", err);
+      }
+    }
+
+    // Load existing traces from server on startup
+    async function fetchInitialLogs() {
+      try {
+        const res = await fetch('/api/logs');
+        const logs = await res.json();
+        if (Array.isArray(logs) && logs.length > 0) {
+          allSessionTraces = logs;
+          updateLogsCount();
+        }
+      } catch (err) {
+        console.warn("Chưa có logs trước đó:", err);
+      }
+    }
+
+    function updateLogsCount() {
+      const toolCallCount = allSessionTraces.filter(t => t.action_type === 'TOOL_EXECUTION').length;
+      headerLogsCountEl.textContent = `${toolCallCount} Tools / ${allSessionTraces.length} Steps`;
+    }
+
+    function toggleGlobalLogsDrawer() {
+      const isOpen = globalLogsDrawer.classList.toggle('open');
+      btnReactLogsToggle.classList.toggle('active', isOpen);
+      if (isOpen) {
+        renderGlobalLogs();
+      }
+    }
+
+    function renderGlobalLogs() {
+      if (!allSessionTraces || allSessionTraces.length === 0) {
+        globalLogsContainer.innerHTML = `
+          <div style="font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 40px;">
+            Chưa có ReAct Logs nào được ghi nhận.<br>Hãy gửi 1 câu lệnh để bắt đầu quan sát chuỗi suy luận!
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 12px; color: var(--text-muted);">Tổng cộng: <b>${allSessionTraces.length}</b> sự kiện trace</span>
+          <button class="btn-copy-raw" style="margin-top: 0;" onclick="copyRawTrace('${escapeHtml(JSON.stringify(allSessionTraces, null, 2)).replace(/'/g, "\\'")}')">
+            📋 Copy JSON
+          </button>
+        </div>
+        <div class="react-logs-timeline">
+      `;
+
+      allSessionTraces.forEach((t, idx) => {
+        if (t.action_type === 'TOOL_EXECUTION') {
+          html += `
+            <div class="chain-step-card tool-execution">
+              <div class="step-header">
+                <span class="step-badge badge-tool">🛠️ Step ${t.step || (idx + 1)}: ${t.tool_name}</span>
+                <span class="step-latency">⏱️ ${t.latency_ms || 0} ms</span>
+              </div>
+              <div class="step-content">
+                <div>
+                  <div class="log-section-label">🎯 Query</div>
+                  <div class="code-box">${escapeHtml(t.query || '')}</div>
+                </div>
+                <div>
+                  <div class="log-section-label">🧠 Thought</div>
+                  <div class="code-box">${escapeHtml(t.thought || 'Xác định công cụ cần gọi')}</div>
+                </div>
+                <div>
+                  <div class="log-section-label">⚙️ Tool Arguments</div>
+                  <div class="code-box tool-args-box">${escapeHtml(JSON.stringify(t.arguments, null, 2))}</div>
+                </div>
+                <div>
+                  <div class="log-section-label">👁️ Observation từ MCP Server</div>
+                  <div class="code-box obs-box">${escapeHtml(JSON.stringify(t.observation, null, 2))}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (t.action_type === 'FINAL_ANSWER') {
+          html += `
+            <div class="chain-step-card final-answer">
+              <div class="step-header">
+                <span class="step-badge badge-final">🏁 Step ${t.step || (idx + 1)}: Final Answer</span>
+                <span class="step-latency">⏱️ ${t.latency_ms || 0} ms</span>
+              </div>
+              <div class="step-content">
+                <div>
+                  <div class="log-section-label">🧠 Synthesis Thought</div>
+                  <div class="code-box">${escapeHtml(t.thought || 'Tổng hợp phản hồi')}</div>
+                </div>
+                <div>
+                  <div class="log-section-label">💬 Output</div>
+                  <div class="code-box">${escapeHtml(t.output || '')}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      html += `</div>`;
+      globalLogsContainer.innerHTML = html;
+    }
+
+    function renderBudget(categories) {
+      budgetListEl.innerHTML = '';
+
+      const allZero = Object.values(categories).every(c => c.monthly_limit === 0 && c.spent === 0);
+      if (allZero) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'padding: 12px; background: rgba(99, 102, 241, 0.1); border: 1px dashed rgba(99, 102, 241, 0.35); border-radius: var(--radius-md); font-size: 12px; color: #a5b4fc; text-align: center; margin-bottom: 12px;';
+        hint.innerHTML = '⚡ <b>Trạng thái:</b> Dữ liệu mặc định đang là <b>0 VNĐ</b>.<br>Bấm nút <b>📥 Load Sample Data</b> ở thanh tiêu đề để tải bộ dữ liệu mẫu!';
+        budgetListEl.appendChild(hint);
+      }
+
+      for (const [key, item] of Object.entries(categories)) {
+        const hasLimit = item.monthly_limit > 0;
+        const pct = hasLimit ? Math.min(100, Math.round((item.spent / item.monthly_limit) * 100)) : 0;
+        let badgeClass = 'badge-safe';
+        let badgeText = hasLimit ? `${pct}% đã dùng` : 'Mặc định (0đ)';
+        let barColor = 'linear-gradient(90deg, #10b981, #34d399)';
+
+        if (hasLimit && (item.remaining < 0 || pct >= 100)) {
+          badgeClass = 'badge-danger';
+          badgeText = `VƯỢT HẠN MỨC (${pct}%)`;
+          barColor = 'linear-gradient(90deg, #ef4444, #f87171)';
+        } else if (hasLimit && pct >= 80) {
+          badgeClass = 'badge-warn';
+          badgeText = `SẮP HẾT (${pct}%)`;
+          barColor = 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+        } else if (!hasLimit && item.spent > 0) {
+          badgeClass = 'badge-warn';
+          badgeText = 'Chưa có hạn mức';
+          barColor = 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+        }
+
+        const card = document.createElement('div');
+        card.className = 'budget-card';
+        card.innerHTML = `
+          <div class="budget-card-header">
+            <span class="category-name">${getCategoryEmoji(key)} ${key}</span>
+            <span class="badge ${badgeClass}">${badgeText}</span>
+          </div>
+          <div class="budget-progress-bg">
+            <div class="budget-progress-fill" style="width: ${hasLimit ? pct : (item.spent > 0 ? 100 : 0)}%; background: ${barColor};"></div>
+          </div>
+          <div class="budget-numbers">
+            <span>Hạn mức: <b>${item.monthly_limit.toLocaleString()}đ</b></span>
+            <span>Đã chi: <b>${item.spent.toLocaleString()}đ</b></span>
+            <span>Còn lại: <b>${item.remaining.toLocaleString()}đ</b></span>
+          </div>
+        `;
+        budgetListEl.appendChild(card);
+      }
+    }
+
+    function getCategoryEmoji(cat) {
+      const map = {
+        'ăn uống': '🍜',
+        'giải trí': '🎬',
+        'mua sắm': '🛍️',
+        'di chuyển': '🛵',
+        'học tập': '📚'
+      };
+      return map[cat.toLowerCase()] || '🏷️';
+    }
+
+    async function loadSampleData() {
+      try {
+        const res = await fetch('/api/sample', { method: 'POST' });
+        const data = await res.json();
+        renderBudget(data.budget);
+        alert("✅ " + (data.message || "Đã nạp thành công bộ dữ liệu tài chính mẫu!"));
+      } catch (e) {
+        alert("Lỗi khi nạp dữ liệu mẫu: " + e);
+      }
+    }
+
+    async function resetDatabase() {
+      if (!confirm("Bạn có muốn khôi phục dữ liệu ngân sách về trạng thái mặc định (0)?")) return;
+      try {
+        const res = await fetch('/api/reset', { method: 'POST' });
+        const data = await res.json();
+        renderBudget(data.budget);
+        alert("✅ " + (data.message || "Đã khôi phục dữ liệu về trạng thái mặc định (0) thành công!"));
+      } catch (e) {
+        alert("Lỗi khi reset: " + e);
+      }
+    }
+
+    function sendQuickPrompt(promptText) {
+      userInputEl.value = promptText;
+      handleSendMessage();
+    }
+
+    function appendUserMessage(text) {
+      const row = document.createElement('div');
+      row.className = 'message-row user';
+      row.innerHTML = `
+        <div class="avatar user-av">👤</div>
+        <div class="message-content">
+          <div class="bubble">${escapeHtml(text)}</div>
+        </div>
+      `;
+      chatMessagesEl.appendChild(row);
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    function appendTypingIndicator() {
+      const row = document.createElement('div');
+      row.id = 'typingRow';
+      row.className = 'message-row agent';
+      row.innerHTML = `
+        <div class="avatar agent-av">🤖</div>
+        <div class="message-content">
+          <div class="response-card typing-indicator">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+      `;
+      chatMessagesEl.appendChild(row);
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+      return row;
+    }
+
+    function removeTypingIndicator() {
+      const el = document.getElementById('typingRow');
+      if (el) el.remove();
+    }
+
+    function formatMarkdown(text) {
+      if (!text) return '';
+      let html = escapeHtml(text);
+      // Bold
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Lists
+      html = html.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+      html = html.replace(/^- (.*?)$/gm, '<li>$1</li>');
+      html = html.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+      // Line breaks
+      html = html.replace(/\n\n/g, '<br><br>');
+      html = html.replace(/\n/g, '<br>');
+      return html;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function switchTab(cardId, tabName) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+
+      const tabBtns = card.querySelectorAll('.tab-btn');
+      const tabPanes = card.querySelectorAll('.tab-pane');
+
+      tabBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+      });
+
+      tabPanes.forEach(pane => {
+        pane.classList.toggle('active', pane.dataset.tab === tabName);
+      });
+    }
+
+    function copyRawTrace(jsonString) {
+      navigator.clipboard.writeText(jsonString).then(() => {
+        alert("Đã sao chép Waterfall Trace Log vào clipboard!");
+      }).catch(err => {
+        alert("Không thể sao chép: " + err);
+      });
+    }
+
+    function appendAgentResponse(traces) {
+      promptCounter++;
+      const cardId = `responseCard_${promptCounter}`;
+
+      // Thêm các traces này vào session traces tổng
+      allSessionTraces.push(...traces);
+      updateLogsCount();
+      if (globalLogsDrawer.classList.contains('open')) {
+        renderGlobalLogs();
+      }
+
+      const row = document.createElement('div');
+      row.className = 'message-row agent';
+
+      const toolSteps = traces.filter(t => t.action_type === 'TOOL_EXECUTION');
+      const finalStep = traces.find(t => t.action_type === 'FINAL_ANSWER') || traces[traces.length - 1];
+      const finalOutput = finalStep ? finalStep.output : 'Đã hoàn tất xử lý.';
+
+      // Xây dựng Timeline cho Tab ReAct Logs trong từng tin nhắn
+      let logsTimelineHtml = '';
+      traces.forEach(t => {
+        if (t.action_type === 'TOOL_EXECUTION') {
+          logsTimelineHtml += `
+            <div class="chain-step-card tool-execution">
+              <div class="step-header">
+                <span class="step-badge badge-tool">🛠️ Step ${t.step}: Tool Call (${t.tool_name})</span>
+                <span class="step-latency">⏱️ ${t.latency_ms || 0} ms</span>
+              </div>
+              <div class="step-content">
+                <div>
+                  <div class="log-section-label">🧠 Thought</div>
+                  <div class="code-box">${escapeHtml(t.thought || 'Nhận diện intent và xác định tham số gọi Tool')}</div>
+                </div>
+                <div>
+                  <div class="log-section-label">⚙️ Arguments (JSON Schema)</div>
+                  <div class="code-box tool-args-box">${escapeHtml(JSON.stringify(t.arguments, null, 2))}</div>
+                </div>
+                <div>
+                  <div class="log-section-label">👁️ MCP Server Observation</div>
+                  <div class="code-box obs-box">${escapeHtml(JSON.stringify(t.observation, null, 2))}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (t.action_type === 'FINAL_ANSWER') {
+          logsTimelineHtml += `
+            <div class="chain-step-card final-answer">
+              <div class="step-header">
+                <span class="step-badge badge-final">🏁 Step ${t.step}: Final Answer Synthesis</span>
+                <span class="step-latency">⏱️ ${t.latency_ms || 0} ms</span>
+              </div>
+              <div class="step-content">
+                <div>
+                  <div class="log-section-label">🧠 Synthesis Thought</div>
+                  <div class="code-box">${escapeHtml(t.thought || 'Tổng hợp phản hồi')}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      const rawJsonString = escapeHtml(JSON.stringify(traces, null, 2));
+
+      row.innerHTML = `
+        <div class="avatar agent-av">🤖</div>
+        <div class="message-content">
+          <div class="response-card" id="${cardId}">
+            <div class="card-tab-nav">
+              <button class="tab-btn active" data-tab="answer" onclick="switchTab('${cardId}', 'answer')">
+                <span>💬 Phản Hồi</span>
+              </button>
+              <button class="tab-btn" data-tab="react-logs" onclick="switchTab('${cardId}', 'react-logs')">
+                <span>🔄 ReAct Logs</span>
+                <span class="tab-badge">${toolSteps.length} Tools</span>
+              </button>
+            </div>
+
+            <!-- Tab 1: Answer -->
+            <div class="tab-pane active" data-tab="answer">
+              <div class="answer-text">
+                ${formatMarkdown(finalOutput)}
+              </div>
+            </div>
+
+            <!-- Tab 2: ReAct Logs -->
+            <div class="tab-pane" data-tab="react-logs">
+              <div class="react-logs-timeline">
+                <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px;">
+                  Chuỗi thực thi ReAct Tool Chain qua giao thức Model Context Protocol (MCP):
+                </div>
+                ${logsTimelineHtml}
+                <button class="btn-copy-raw" onclick="copyRawTrace('${rawJsonString.replace(/'/g, "\\'")}')">
+                  📋 Sao chép Raw JSON Trace
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      chatMessagesEl.appendChild(row);
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    async function handleSendMessage() {
+      const query = userInputEl.value.trim();
+      if (!query) return;
+
+      appendUserMessage(query);
+      userInputEl.value = '';
+      userInputEl.disabled = true;
+      sendBtnEl.disabled = true;
+
+      appendTypingIndicator();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: query })
+        });
+
+        const data = await response.json();
+        removeTypingIndicator();
+
+        if (data.traces) {
+          appendAgentResponse(data.traces);
+        }
+        if (data.budget) {
+          renderBudget(data.budget);
+        }
+      } catch (err) {
+        removeTypingIndicator();
+        alert("Lỗi khi kết nối với Agent Server: " + err);
+      } finally {
+        userInputEl.disabled = false;
+        sendBtnEl.disabled = false;
+        userInputEl.focus();
+      }
+    }
+
+    // Init
+    fetchBudget();
+    fetchInitialLogs();
+  </script>
+</body>
+</html>

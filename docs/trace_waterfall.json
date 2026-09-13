@@ -1,37 +1,32 @@
 [
   {
     "step": 1,
-    "query": "Tôi vừa ăn tối 350k ở Kichi Kichi, hãy kiểm tra ngân sách ăn uống còn lại và ghi nhận giao dịch này vào sổ thu chi giúp tôi nhé.",
+    "query": "Hãy kiểm tra giúp tôi ngân sách và hạn mức chi tiêu ăn uống trong tháng này còn lại bao nhiêu.",
     "action_type": "TOOL_EXECUTION",
-    "tool_name": "update_finance_database",
+    "tool_name": "check_budget_limits_and_history",
     "arguments": {
-      "amount": 350000,
-      "description": "Ăn tối tại Kichi Kichi",
-      "destination": "Notion",
       "category": "ăn uống"
     },
     "observation": {
-      "status": "NEAR_LIMIT_WARNING",
-      "action": "TRANSACTION_RECORDED",
-      "destination": "Notion",
+      "status": "SUCCESS",
       "category": "ăn uống",
-      "amount": 350000.0,
-      "description": "Ăn tối tại Kichi Kichi",
-      "monthly_limit": 5000000,
-      "spent": 4550000.0,
-      "remaining": 450000.0,
+      "month": "2026-09",
+      "monthly_limit": 0,
+      "spent": 0,
+      "remaining": 0,
       "currency": "VND",
-      "usage_percentage": "91.0%",
-      "alert": "⚠️ CẢNH BÁO SẮP VƯỢT HẠN MỨC: Danh mục 'ăn uống' đã sử dụng 91.0%. Số dư còn lại chỉ còn 450,000 VNĐ."
+      "usage_percentage": "0.0%",
+      "alert": "ℹ️ Danh mục đang ở trạng thái mặc định (0 VNĐ). Chưa phát sinh chi tiêu và chưa thiết lập hạn mức.",
+      "recent_transactions": []
     },
-    "latency_ms": 1151.88
+    "latency_ms": 2489.87
   },
   {
     "step": 2,
-    "query": "Tôi vừa ăn tối 350k ở Kichi Kichi, hãy kiểm tra ngân sách ăn uống còn lại và ghi nhận giao dịch này vào sổ thu chi giúp tôi nhé.",
+    "query": "Hãy kiểm tra giúp tôi ngân sách và hạn mức chi tiêu ăn uống trong tháng này còn lại bao nhiêu.",
     "action_type": "FINAL_ANSWER",
     "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
-    "output": "Giao dịch của bạn đã được ghi nhận thành công vào cơ sở dữ liệu Notion! \n\nDưới đây là chi tiết tình hình tài chính cho danh mục **Ăn uống** của bạn trong tháng này:\n\n- **Giao dịch vừa ghi nhận:** Ăn tối tại Kichi Kichi (`350,000 VNĐ`)\n- **Hạn mức hàng tháng:** `5,000,000 VNĐ`\n- **Tổng đã chi tiêu:** `4,550,000 VNĐ` (Đã đạt **91.0%** hạn mức)\n- **Số dư còn lại:** `450,000 VNĐ`\n\n⚠️ **CẢNH BÁO SẮP VƯỢT HẠN MỨC:** Danh mục 'ăn uống' của bạn đã sử dụng đến 91% ngân sách. Số dư còn lại chỉ còn lại 450,000 VNĐ, bạn hãy lưu ý cân nhắc chi tiêu thật tiết kiệm cho các bữa ăn tiếp theo trong tháng nhé!",
-    "latency_ms": 1424.13
+    "output": "Dựa trên kết quả kiểm tra từ hệ thống, đây là thông tin chi tiết về ngân sách và hạn mức chi tiêu danh mục **ăn uống** trong tháng này (09/2026):\n\n- **Hạn mức hàng tháng:** 0 VNĐ *(Chưa thiết lập hạn mức)*\n- **Đã chi tiêu:** 0 VNĐ\n- **Số dư còn lại:** 0 VNĐ\n- **Tỷ lệ sử dụng:** 0.0%\n- **Giao dịch gần đây:** Không có giao dịch nào được ghi nhận.\n\nℹ️ **Cảnh báo từ hệ thống:** Danh mục đang ở trạng thái mặc định (0 VNĐ). Chưa phát sinh chi tiêu và chưa thiết lập hạn mức. \n\nNếu bạn muốn thiết lập hạn mức mới hoặc bắt đầu ghi nhận các khoản chi tiêu ăn uống (ví dụ: *\"Ghi nhận ăn trưa 50k\"*), hãy cho tôi biết nhé!",
+    "latency_ms": 1872.39
   }
 ]
