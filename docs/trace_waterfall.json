@@ -1,6 +1,14 @@
 [
   {
     "step": 1,
+    "query": "Chào bạn, quy tắc quản lý tài chính 50/30/20 hoạt động như thế nào và tôi nên phân bổ tiền chi tiêu hàng tháng ra sao?",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Chào bạn! Quy tắc quản lý tài chính **50/30/20** là một phương pháp lập ngân sách rất phổ biến và hiệu quả, giúp bạn cân bằng giữa việc tận hưởng cuộc sống hiện tại và chuẩn bị cho tương lai. \n\nPhương pháp này chia thu nhập sau thuế của bạn thành 3 nhóm chính:\n\n### 1. 50% cho Nhu cầu thiết yếu (Needs)\nĐây là những khoản chi phí bắt buộc bạn phải trả để duy trì cuộc sống và công việc hàng ngày. Nếu không chi trả, cuộc sống của bạn sẽ bị ảnh hưởng trực tiếp.\n* **Ví dụ:** Tiền thuê nhà, điện, nước, internet, chi phí đi lại (xăng xe, vé xe buýt), tiền chợ/thực phẩm thiết yếu, bảo hiểm và các khoản trả nợ tối thiểu.\n\n### 2. 30% cho Mong muốn cá nhân (Wants)\nĐây là những khoản chi tiêu mang tính chất giải trí, sở thích hoặc nâng cao chất lượng cuộc sống. Những khoản này không bắt buộc, bạn hoàn toàn có thể cắt giảm nếu cần.\n* **Ví dụ:** Đi ăn nhà hàng, cà phê với bạn bè, mua sắm quần áo thời trang, xem phim, đi du lịch, các gói đăng ký giải trí (Netflix, Spotify, v.v.).\n\n### 3. 20% cho Tiết kiệm & Đầu tư (Savings & Investments)\nKhoản tiền này dành riêng cho việc xây dựng sự vững chắc về tài chính trong tương lai, giúp bạn phòng ngừa rủi ro và đạt được các mục tiêu dài hạn.\n* **Ví dụ:** Lập quỹ khẩn cấp (tương đương 3-6 tháng chi phí sinh hoạt), gửi tiết kiệm ngân hàng, đầu tư chứng khoán/quỹ mở, hoặc trả trước các khoản nợ có lãi suất cao.\n\n---\n\n### Bạn nên phân bổ như thế nào?\nĐể áp dụng, bạn hãy làm theo các bước sau:\n1. **Xác định thu nhập ròng:** Tính tổng số tiền thực nhận hàng tháng sau khi đã trừ thuế và các khoản đóng góp bắt buộc.\n2. **Nhân tỷ lệ:** \n   * Thu nhập $\\times$ 50% = Hạn mức chi cho Nhu cầu.\n   * Thu nhập $\\times$ 30% = Hạn mức chi cho Mong muốn.\n   * Thu nhập $\\times$ 20% = Hạn mức dành cho Tiết kiệm.\n3. **Theo dõi chi tiêu:** Bạn có thể sử dụng các danh mục trong hệ thống của tôi (như *ăn uống, giải trí, mua sắm, di chuyển, học tập*) để ghi nhận và đối chiếu xem các khoản chi thực tế có đang bám sát tỷ lệ này hay không.\n\nNếu bạn muốn kiểm tra hoặc thiết lập hạn mức chi tiêu cụ thể cho tháng này theo quy tắc trên, hãy cho tôi biết thu nhập hàng tháng của bạn nhé!",
+    "latency_ms": 4751.99
+  },
+  {
+    "step": 1,
     "query": "Hãy kiểm tra giúp tôi ngân sách và hạn mức chi tiêu ăn uống trong tháng này còn lại bao nhiêu.",
     "action_type": "TOOL_EXECUTION",
     "tool_name": "check_budget_limits_and_history",
@@ -11,22 +19,168 @@
       "status": "SUCCESS",
       "category": "ăn uống",
       "month": "2026-09",
-      "monthly_limit": 0,
-      "spent": 0,
-      "remaining": 0,
+      "monthly_limit": 5000000,
+      "spent": 4200000,
+      "remaining": 800000,
       "currency": "VND",
-      "usage_percentage": "0.0%",
-      "alert": "ℹ️ Danh mục đang ở trạng thái mặc định (0 VNĐ). Chưa phát sinh chi tiêu và chưa thiết lập hạn mức.",
-      "recent_transactions": []
+      "usage_percentage": "84.0%",
+      "alert": "⚠️ CẢNH BÁO: Đã dùng 84.0% ngân sách! Chỉ còn 800,000 VNĐ.",
+      "recent_transactions": [
+        {
+          "date": "2026-09-02",
+          "amount": 120000,
+          "description": "Cơm trưa văn phòng"
+        },
+        {
+          "date": "2026-09-05",
+          "amount": 250000,
+          "description": "Cafe Highlands cùng bạn"
+        },
+        {
+          "date": "2026-09-10",
+          "amount": 480000,
+          "description": "Pizza 4P's"
+        }
+      ]
     },
-    "latency_ms": 2489.87
+    "latency_ms": 1133.74
   },
   {
     "step": 2,
     "query": "Hãy kiểm tra giúp tôi ngân sách và hạn mức chi tiêu ăn uống trong tháng này còn lại bao nhiêu.",
     "action_type": "FINAL_ANSWER",
     "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
-    "output": "Dựa trên kết quả kiểm tra từ hệ thống, đây là thông tin chi tiết về ngân sách và hạn mức chi tiêu danh mục **ăn uống** trong tháng này (09/2026):\n\n- **Hạn mức hàng tháng:** 0 VNĐ *(Chưa thiết lập hạn mức)*\n- **Đã chi tiêu:** 0 VNĐ\n- **Số dư còn lại:** 0 VNĐ\n- **Tỷ lệ sử dụng:** 0.0%\n- **Giao dịch gần đây:** Không có giao dịch nào được ghi nhận.\n\nℹ️ **Cảnh báo từ hệ thống:** Danh mục đang ở trạng thái mặc định (0 VNĐ). Chưa phát sinh chi tiêu và chưa thiết lập hạn mức. \n\nNếu bạn muốn thiết lập hạn mức mới hoặc bắt đầu ghi nhận các khoản chi tiêu ăn uống (ví dụ: *\"Ghi nhận ăn trưa 50k\"*), hãy cho tôi biết nhé!",
-    "latency_ms": 1872.39
+    "output": "Dựa vào kết quả tra cứu từ hệ thống tài chính, dưới đây là tình hình chi tiêu cho danh mục **ăn uống** trong tháng **09/2026** của bạn:\n\n- **Hạn mức hàng tháng:** 5,000,000 VNĐ\n- **Đã chi tiêu:** 4,200,000 VNĐ\n- **Số dư còn lại:** **800,000 VNĐ**\n- **Tỷ lệ sử dụng:** 84.0%\n\n⚠️ **CẢNH BÁO:** Bạn đã dùng 84.0% ngân sách ăn uống trong tháng! Số tiền còn lại chỉ là **800,000 VNĐ**, vui lòng cân nhắc chi tiêu tiết kiệm trong những ngày tới để tránh vượt quá hạn mức cho phép.\n\n**Lịch sử giao dịch gần đây:**\n1. *02/09/2026:* 120,000 VNĐ - Cơm trưa văn phòng\n2. *05/09/2026:* 250,000 VNĐ - Cafe Highlands cùng bạn\n3. *10/09/2026:* 480,000 VNĐ - Pizza 4P's",
+    "latency_ms": 1898.54
+  },
+  {
+    "step": 1,
+    "query": "Ghi nhận giúp tôi một khoản chi mua sách giáo trình AI với số tiền 200,000 VNĐ vào danh mục học tập trên Notion.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "update_finance_database",
+    "arguments": {
+      "amount": 200000,
+      "category": "học tập",
+      "destination": "Notion",
+      "description": "Mua sách giáo trình AI"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "action": "TRANSACTION_RECORDED",
+      "destination": "Notion",
+      "category": "học tập",
+      "amount": 200000.0,
+      "description": "Mua sách giáo trình AI",
+      "monthly_limit": 2000000,
+      "spent": 700000.0,
+      "remaining": 1300000.0,
+      "currency": "VND",
+      "usage_percentage": "35.0%",
+      "alert": "✅ Ngân sách danh mục 'học tập' vẫn trong tầm kiểm soát (35.0% đã dùng). Còn lại 1,300,000 VNĐ."
+    },
+    "latency_ms": 1115.66
+  },
+  {
+    "step": 2,
+    "query": "Ghi nhận giúp tôi một khoản chi mua sách giáo trình AI với số tiền 200,000 VNĐ vào danh mục học tập trên Notion.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Dựa trên kết quả thực hiện từ hệ thống, tôi đã ghi nhận thành công khoản chi tiêu của bạn:\n\n- **Khoản chi:** Mua sách giáo trình AI\n- **Số tiền:** 200,000 VNĐ\n- **Danh mục:** Học tập\n- **Hệ thống đồng bộ:** Notion\n\n📊 **Tình hình ngân sách danh mục 'học tập':**\n- **Hạn mức hàng tháng:** 2,000,000 VNĐ\n- **Đã chi tiêu:** 700,000 VNĐ (35.0%)\n- **Số dư còn lại:** 1,300,000 VNĐ\n- **Trạng thái:** ✅ Ngân sách vẫn đang trong tầm kiểm soát an toàn.",
+    "latency_ms": 2551.74
+  },
+  {
+    "step": 1,
+    "query": "Tôi vừa ăn tối 350k ở Kichi Kichi, hãy kiểm tra ngân sách ăn uống còn lại và ghi nhận giao dịch này vào sổ thu chi giúp tôi nhé.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "check_budget_limits_and_history",
+    "arguments": {
+      "category": "ăn uống"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "category": "ăn uống",
+      "month": "2026-09",
+      "monthly_limit": 5000000,
+      "spent": 4200000,
+      "remaining": 800000,
+      "currency": "VND",
+      "usage_percentage": "84.0%",
+      "alert": "⚠️ CẢNH BÁO: Đã dùng 84.0% ngân sách! Chỉ còn 800,000 VNĐ.",
+      "recent_transactions": [
+        {
+          "date": "2026-09-02",
+          "amount": 120000,
+          "description": "Cơm trưa văn phòng"
+        },
+        {
+          "date": "2026-09-05",
+          "amount": 250000,
+          "description": "Cafe Highlands cùng bạn"
+        },
+        {
+          "date": "2026-09-10",
+          "amount": 480000,
+          "description": "Pizza 4P's"
+        }
+      ]
+    },
+    "latency_ms": 1058.96
+  },
+  {
+    "step": 2,
+    "query": "Tôi vừa ăn tối 350k ở Kichi Kichi, hãy kiểm tra ngân sách ăn uống còn lại và ghi nhận giao dịch này vào sổ thu chi giúp tôi nhé.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "update_finance_database",
+    "arguments": {
+      "amount": 350000,
+      "category": "ăn uống",
+      "destination": "Notion",
+      "description": "Ăn tối 350k ở Kichi Kichi"
+    },
+    "observation": {
+      "status": "NEAR_LIMIT_WARNING",
+      "action": "TRANSACTION_RECORDED",
+      "destination": "Notion",
+      "category": "ăn uống",
+      "amount": 350000.0,
+      "description": "Ăn tối 350k ở Kichi Kichi",
+      "monthly_limit": 5000000,
+      "spent": 4550000.0,
+      "remaining": 450000.0,
+      "currency": "VND",
+      "usage_percentage": "91.0%",
+      "alert": "⚠️ CẢNH BÁO SẮP VƯỢT HẠN MỨC: Danh mục 'ăn uống' đã sử dụng 91.0%. Số dư còn lại chỉ còn 450,000 VNĐ."
+    },
+    "latency_ms": 1272.08
+  },
+  {
+    "step": 3,
+    "query": "Tôi vừa ăn tối 350k ở Kichi Kichi, hãy kiểm tra ngân sách ăn uống còn lại và ghi nhận giao dịch này vào sổ thu chi giúp tôi nhé.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Giao dịch của bạn đã được ghi nhận thành công vào cơ sở dữ liệu Notion. Dưới đây là tình trạng chi tiết của danh mục **ăn uống**:\n\n- **Tổng hạn mức tháng:** 5.000.000 VNĐ\n- **Đã chi tiêu:** 4.550.000 VNĐ\n- **Số dư còn lại:** 450.000 VNĐ\n- **Tỷ lệ sử dụng:** 91.0%\n\n⚠️ **CẢNH BÁO SẮP VƯỢT HẠN MỨC:** Danh mục 'ăn uống' đã sử dụng 91.0% hạn mức. Số dư còn lại chỉ còn **450,000 VNĐ**, bạn hãy lưu ý cân đối các khoản chi tiêu tiếp theo trong tháng nhé!",
+    "latency_ms": 2485.22
+  },
+  {
+    "step": 1,
+    "query": "Kiểm tra giúp tôi hạn mức ngân sách của danh mục 'y tế' trong tháng này.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "check_budget_limits_and_history",
+    "arguments": {
+      "category": "y tế"
+    },
+    "observation": {
+      "status": "NOT_FOUND",
+      "message": "Không tìm thấy danh mục ngân sách 'y tế'. Các danh mục hiện có: ăn uống, giải trí, mua sắm, di chuyển, học tập."
+    },
+    "latency_ms": 1074.13
+  },
+  {
+    "step": 2,
+    "query": "Kiểm tra giúp tôi hạn mức ngân sách của danh mục 'y tế' trong tháng này.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "**Thought:** Dựa trên kết quả quan sát từ MCP Server (`Observation`), danh mục \"y tế\" không tồn tại trong hệ thống quản lý ngân sách hiện tại của người dùng. Các danh mục hợp lệ gồm có: *ăn uống, giải trí, mua sắm, di chuyển, học tập*. Tôi sẽ thông báo rõ ràng điều này cho người dùng và hướng dẫn họ kiểm tra đúng các danh mục được hỗ trợ.\n\n**Final Answer:**\n❌ **[THÔNG BÁO: KHÔNG TÌM THẤY DANH MỤC]**\n\nHệ thống không tìm thấy danh mục ngân sách **'y tế'** trong cơ sở dữ liệu tháng này. \n\nCác danh mục ngân sách hiện có và được hỗ trợ tra cứu bao gồm:\n- **Ăn uống**\n- **Giải trí**\n- **Mua sắm**\n- **Di chuyển**\n- **Học tập**\n\nBạn vui lòng kiểm tra lại và yêu cầu tra cứu với một trong các danh mục hợp lệ trên nhé!",
+    "latency_ms": 1648.31
   }
 ]

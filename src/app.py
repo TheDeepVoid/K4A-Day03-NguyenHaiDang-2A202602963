@@ -181,7 +181,22 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
             tool_sig = (tool_name, json.dumps(arguments, sort_keys=True))
             print(f"🛠️ [Action Proposed]: {tool_name}({arguments})")
 
-            # Thực thi Tool qua MCP Server
+            # Kiểm tra tránh lặp vô hạn TRƯỚC khi thực thi để không gây side effect kép
+            if tool_sig in executed_tools:
+                print("⚠️ [ReAct Notice]: Đã phát hiện gọi trùng công cụ. Không thực thi lại, tiến hành tổng hợp câu trả lời cuối cùng.")
+                final_answer = format_observation_summary(last_tool_name, last_obs_data)
+                print(f"🏁 [Final Answer]: {final_answer}")
+                trace_logs.append({
+                    "step": step,
+                    "query": user_query,
+                    "action_type": "FINAL_ANSWER",
+                    "thought": f"Công cụ '{tool_name}' đã được thực thi trước đó cùng tham số. Tổng hợp kết quả từ Observation gần nhất.",
+                    "output": final_answer,
+                    "latency_ms": latency_ms
+                })
+                break
+
+            # Thực thi Tool qua MCP Server (chỉ khi công cụ chưa được gọi cùng tham số)
             mcp_result = mcp_server.call_tool(tool_name, arguments)
             obs_data = mcp_result.get("result", {})
             last_obs_data = obs_data
@@ -203,21 +218,6 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 "latency_ms": latency_ms
             })
 
-            # Kiểm tra tránh lặp vô hạn nếu gọi cùng một tool với cùng tham số
-            if tool_sig in executed_tools:
-                print("⚠️ [ReAct Notice]: Đã phát hiện gọi trùng công cụ. Tiến hành tổng hợp câu trả lời cuối cùng.")
-                final_answer = format_observation_summary(tool_name, obs_data)
-                print(f"🏁 [Final Answer]: {final_answer}")
-                trace_logs.append({
-                    "step": step + 1,
-                    "query": user_query,
-                    "action_type": "FINAL_ANSWER",
-                    "thought": "Tổng hợp kết quả sau khi thực thi công cụ.",
-                    "output": final_answer,
-                    "latency_ms": 10.0
-                })
-                break
-
             executed_tools.append(tool_sig)
 
             # Cập nhật context cho bước ReAct tiếp theo
@@ -235,7 +235,7 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                     f"Yêu cầu ban đầu của người dùng: {user_query}\n\n"
                     f"Các bước đã thực hiện:\n"
                     f"- Đã gọi công cụ: {tool_name} với tham số {json.dumps(arguments, ensure_ascii=False)}\n"
-                    f"- Kết quả quan sát (Observation) từ MCP Server:\n{obs_formatted}\n\n"
+                    f"- [Observation] Kết quả quan sát từ MCP Server:\n{obs_formatted}\n\n"
                     f"Dựa vào thông tin trên, hãy thực hiện hành động tiếp theo (gọi thêm công cụ nếu cần cập nhật tiếp) "
                     f"hoặc đưa ra câu trả lời cuối cùng (Final Answer) đầy đủ, chính xác và có cảnh báo nếu sắp/đã vượt hạn mức."
                 )
@@ -290,6 +290,9 @@ if __name__ == "__main__":
                 print("\n👋 Đã thoát phiên tương tác.")
                 break
     elif "--all" in sys.argv:
+        from tools import load_sample_finance_data
+        load_sample_finance_data()
+        print("📥 [DATABASE]: Đã nạp dữ liệu tài chính mẫu (Sample Data) để kiểm thử 5 Test Cases.")
         print("🚀 [TEST SUITE MODE] Kiểm tra 5 Test Cases:")
         completed_count = 0
         todo_count = 0

@@ -30,7 +30,7 @@
   {
     "id": "TC05",
     "type": "edge_case_handling",
-    "question": "Kiểm tra giúp tôi hạn mức ngân sách của danh mục 'crypto và tiền ảo' trong tháng này.",
+    "question": "Kiểm tra giúp tôi hạn mức ngân sách của danh mục 'y tế' trong tháng này.",
     "expected_behavior": "Agent gọi Tool tra cứu, nhận kết quả NOT_FOUND từ MCP Server và đưa ra phản hồi lịch sự, chính xác không bịa đặt dữ liệu (Anti-Hallucination).",
     "complexity": "Medium"
   }
