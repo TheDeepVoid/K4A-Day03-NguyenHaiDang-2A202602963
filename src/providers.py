@@ -36,9 +36,43 @@ class MockOfflineProvider(BaseLLMProvider):
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
-        
-        # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+
+        # Nhận diện phản hồi sau khi nhận Observation trong ReAct Loop
+        if "[observation" in prompt_lower or "observation từ" in prompt_lower:
+            return {
+                "type": "text",
+                "content": "[Mock Agent Response]: Đã hoàn tất tra cứu và cập nhật dữ liệu tài chính thành công. Cảnh báo: Hạn mức chi tiêu ăn uống đã sử dụng trên 80%, vui lòng chú ý tiết kiệm.",
+                "thought": "Đã nhận được kết quả Observation từ Tool, tổng hợp câu trả lời cuối cùng."
+            }
+
+        # Mô phỏng nhận diện intent gọi Tool cho cả Personal Finance và Học vụ
+        if "kichi" in prompt_lower or "350k" in prompt_lower or "ghi nhận" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "update_finance_database",
+                "arguments": {
+                    "category": "ăn uống",
+                    "amount": 350000,
+                    "description": "Ăn tối tại Kichi Kichi",
+                    "destination": "Notion"
+                },
+                "thought": "Người dùng vừa chi tiêu 350.000 VNĐ cho bữa ăn tối tại Kichi Kichi. Tôi sẽ gọi tool 'update_finance_database' để ghi nhận vào Notion và kiểm tra cảnh báo ngân sách."
+            }
+        elif "crypto" in prompt_lower or "tiền ảo" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "check_budget_limits_and_history",
+                "arguments": {"category": "crypto"},
+                "thought": "Người dùng muốn tra cứu danh mục ngân sách 'crypto'. Tôi sẽ gọi tool check_budget_limits_and_history để kiểm tra hạn mức danh mục này."
+            }
+        elif "ngân sách" in prompt_lower or "ăn uống" in prompt_lower or "hạn mức" in prompt_lower or "định mức" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "check_budget_limits_and_history",
+                "arguments": {"category": "ăn uống"},
+                "thought": "Người dùng muốn kiểm tra ngân sách và hạn mức chi tiêu ăn uống. Tôi sẽ gọi tool check_budget_limits_and_history."
+            }
+        elif "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
             return {
                 "type": "tool_call",
                 "tool_name": "schedule_appointment",
@@ -52,11 +86,17 @@ class MockOfflineProvider(BaseLLMProvider):
                 "arguments": {"student_id": "SV2026001"},
                 "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
             }
+        elif "50/30/20" in prompt_lower or "nguyên tắc" in prompt_lower or "tài chính" in prompt_lower:
+            return {
+                "type": "text",
+                "content": "[Mock Agent Response]: Quy tắc 50/30/20 là phương pháp phân bổ thu nhập cá nhân: 50% cho nhu cầu thiết yếu, 30% cho mong muốn cá nhân và 20% cho tiết kiệm/đầu tư.",
+                "thought": "Câu hỏi chung về nguyên tắc tài chính 50/30/20, trả lời trực tiếp không cần gọi Tool."
+            }
         else:
             return {
                 "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+                "content": f"[Mock Agent Response]: Xin chào! Tôi là Trợ lý Quản lý Chi tiêu Cá nhân. Tôi có thể giúp bạn kiểm tra ngân sách, ghi chép giao dịch và cảnh báo vượt hạn mức.",
+                "thought": "Câu hỏi chung, trả lời trực tiếp không cần gọi Tool."
             }
 
 
